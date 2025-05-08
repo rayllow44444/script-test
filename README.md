@@ -11373,21 +11373,3 @@ local function resgatarDinheiro()
     print("Dinheiro resgatado com sucesso 100,000,000,000!")
     -- Aqui você pode adicionar a lógica para resgatar dinheiro
 end
-
--- Criar um botão
-local botao = display.newRect(160, 240, 200, 50)
-botao:setFillColor(0.2, 0.6, 0.8)
-
--- Adicionar texto ao botão
-local textoBotao = display.newText("Resgatar Dinheiro", 160, 240, native.systemFont, 20)
-textoBotao:setFillColor(1, 1, 1)
-
--- Função de evento para o botão
-local function aoClicar(event)
-    if event.phase == "ended" then
-        resgatarDinheiro()
-    end
-end
-
--- Adicionar listener ao botão
-botao:addEventListener("touch", aoClicar)
