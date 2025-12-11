@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulado Exército Brasileiro - Nível Básico</title>
+    <style>
+        :root {
+            --army-green: #355E3B;
+            --light-green: #4B6F44;
+            --sand: #F4F4F0;
+            --text-dark: #333;
+            --correct: #2e7d32;
+            --wrong: #c62828;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e8e8e8;
+            margin: 0;
+            padding: 0;
+            color: var(--text-dark);
+        }
+
+        header {
+            background-color: var(--army-green);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .score-board {
+            background-color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--army-green);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .question-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--army-green);
+        }
+
+        .subject-tag {
+            background-color: var(--sand);
+            color: var(--army-green);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #f0f0f0;
+            border-color: #999;
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+            opacity: 0.7;
+        }
+
+        /* Estilos de Feedback */
+        .option-btn.correct {
+            background-color: #dcedc8;
+            border-color: var(--correct);
+            color: var(--correct);
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            background-color: #ffcdd2;
+            border-color: var(--wrong);
+            color: var(--wrong);
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+            display: none; /* Escondido inicialmente */
+            border-left: 4px solid var(--correct);
+            font-size: 0.95rem;
+        }
+
+        .footer-note {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .reset-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 15px 30px;
+            background-color: var(--army-green);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .reset-btn:hover {
+            background-color: var(--light-green);
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Simulado Básico - Exército Brasileiro</h1>
+    <p>História, Geografia, Matemática e Português</p>
+    <div class="score-board">Acertos: <span id="score">0</span> / 20</div>
+</header>
+
+<div class="container" id="quiz-container">
+    </div>
+
+<button class="reset-btn" onclick="location.reload()">Reiniciar Simulado</button>
+
+<div class="footer-note">
+    Simulado Educativo - Baseado em conhecimentos gerais para concursos militares.
+</div>
+
+<script>
+    // Banco de Dados das Questões
+    const quizData = [
+        {
+            subject: "História",
+            question: "Quem é considerado o Patrono do Exército Brasileiro, comemorado no dia 25 de agosto?",
+            options: ["Marechal Deodoro da Fonseca", "Duque de Caxias", "General Osório", "Tiradentes"],
+            correct: 1,
+            explanation: "Duque de Caxias (Luís Alves de Lima e Silva) é o Patrono do Exército Brasileiro devido à sua atuação pacificadora e liderança militar."
+        },
+        {
+            subject: "Português",
+            question: "Assinale a alternativa em que o uso da crase está CORRETO.",
+            options: ["O soldado dirigiu-se à ela com respeito.", "A tropa começou à marchar cedo.", "Fui à cidade comprar fardamento.", "Entreguei o documento à um sargento."],
+            correct: 2,
+            explanation: "Correto: Quem vai, vai 'a' algum lugar + artigo 'a' de 'a cidade' (fui a + a cidade = fui à cidade)."
+        },
+        {
+            subject: "Matemática",
+            question: "Um pelotão possui 40 soldados. Se 20% desses soldados estão de férias, quantos soldados estão de férias?",
+            options: ["4 soldados", "8 soldados", "10 soldados", "12 soldados"],
+            correct: 1,
+            explanation: "10% de 40 é 4. Logo, 20% é o dobro, ou seja, 8 (40 x 0,20 = 8)."
+        },
+        {
+            subject: "Geografia",
+            question: "Qual é o maior bioma brasileiro, ocupando cerca de 49% do território nacional?",
+            options: ["Cerrado", "Mata Atlântica", "Caatinga", "Amazônia"],
+            correct: 3,
+            explanation: "A Amazônia é o maior bioma brasileiro, cobrindo quase metade do território, especialmente na região Norte."
+        },
+        {
+            subject: "História",
+            question: "A Força Expedicionária Brasileira (FEB) lutou em qual grande conflito mundial?",
+            options: ["Primeira Guerra Mundial", "Guerra do Paraguai", "Segunda Guerra Mundial", "Guerra Fria"],
+            correct: 2,
+            explanation: "A FEB foi enviada para lutar na Itália durante a Segunda Guerra Mundial, ao lado dos Aliados."
+        },
+        {
+            subject: "Matemática",
+            question: "Qual é o valor de X na equação de 1º grau: 3x - 15 = 30?",
+            options: ["10", "15", "5", "45"],
+            correct: 1,
+            explanation: "3x = 30 + 15 → 3x = 45 → x = 15."
+        },
+        {
+            subject: "Português",
+            question: "Na frase 'Chegaram os novos recrutas', qual é o sujeito?",
+            options: ["Oculto", "Indeterminado", "Chegaram", "Os novos recrutas"],
+            correct: 3,
+            explanation: "Quem chegou? Os novos recrutas. O sujeito está posposto (depois do verbo)."
+        },
+        {
+            subject: "Geografia",
+            question: "Qual destes países da América do Sul NÃO faz fronteira com o Brasil?",
+            options: ["Argentina", "Colômbia", "Chile", "Paraguai"],
+            correct: 2,
+            explanation: "O Chile e o Equador são os únicos países da América do Sul que não tocam o território brasileiro."
+        },
+        {
+            subject: "História",
+            question: "Qual evento histórico marcou o fim do período colonial e o início do Império do Brasil em 1822?",
+            options: ["Abolição da Escravatura", "Proclamação da República", "Independência do Brasil", "Descobrimento do Brasil"],
+            correct: 2,
+            explanation: "A Independência, proclamada por D. Pedro I em 7 de setembro de 1822, iniciou o Império."
+        },
+        {
+            subject: "Matemática",
+            question: "Qual é a área de um terreno quadrado que possui 10 metros de lado?",
+            options: ["20 m²", "40 m²", "100 m²", "1000 m²"],
+            correct: 2,
+            explanation: "A área do quadrado é Lado x Lado (10 x 10 = 100 m²)."
+        },
+        {
+            subject: "Português",
+            question: "Assinale a palavra grafada CORRETAMENTE segundo a norma culta.",
+            options: ["Exceção", "Ezitar", "Anceio", "Paralizar"],
+            correct: 0,
+            explanation: "Exceção escreve-se com 'x' e 'ç'. As outras corretas seriam: Hesitar, Anseio, Paralisar."
+        },
+        {
+            subject: "Geografia",
+            question: "Qual é a capital do estado de Minas Gerais?",
+            options: ["Vitória", "Belo Horizonte", "Rio de Janeiro", "Salvador"],
+            correct: 1,
+            explanation: "Belo Horizonte é a capital de Minas Gerais."
+        },
+        {
+            subject: "História",
+            question: "O Tenentismo foi um movimento político-militar ocorrido no Brasil na década de:",
+            options: ["1960", "1880", "1920", "1940"],
+            correct: 2,
+            explanation: "O Tenentismo ocorreu nos anos 1920 (ex: Revolta dos 18 do Forte, Coluna Prestes)."
+        },
+        {
+            subject: "Matemática",
+            question: "Qual é o resultado da operação 4 + 5 x 2?",
+            options: ["18", "14", "13", "20"],
+            correct: 1,
+            explanation: "Primeiro a multiplicação: 5 x 2 = 10. Depois a soma: 4 + 10 = 14."
+        },
+        {
+            subject: "Português",
+            question: "Em 'O exército brasileiro é intrépido', a palavra destacada significa:",
+            options: ["Medroso", "Corajoso", "Lento", "Desorganizado"],
+            correct: 1,
+            explanation: "Intrépido é sinônimo de valente, corajoso, destemido."
+        },
+        {
+            subject: "Geografia",
+            question: "O 'Polígono das Secas' está localizado majoritariamente em qual região brasileira?",
+            options: ["Norte", "Sul", "Nordeste", "Centro-Oeste"],
+            correct: 2,
+            explanation: "Abrange o sertão nordestino e parte do norte de Minas Gerais."
+        },
+        {
+            subject: "Matemática",
+            question: "Um triângulo tem base de 6cm e altura de 4cm. Qual é a sua área?",
+            options: ["24 cm²", "10 cm²", "12 cm²", "20 cm²"],
+            correct: 2,
+            explanation: "A área do triângulo é (Base x Altura) / 2. Logo: (6 x 4) / 2 = 12."
+        },
+        {
+            subject: "História",
+            question: "Qual destes presidentes governou o Brasil durante o período conhecido como 'Estado Novo' (1937-1945)?",
+            options: ["Juscelino Kubitschek", "Getúlio Vargas", "João Goulart", "Tancredo Neves"],
+            correct: 1,
+            explanation: "Getúlio Vargas instituiu a ditadura do Estado Novo em 1937."
+        },
+        {
+            subject: "Português",
+            question: "Qual a classificação do verbo na frase 'O soldado obedece às ordens'?",
+            options: ["Verbo Transitivo Direto", "Verbo Transitivo Indireto", "Verbo Intransitivo", "Verbo de Ligação"],
+            correct: 1,
+            explanation: "O verbo 'obedecer' rege a preposição 'a' (obedece a algo), logo é Transitivo Indireto."
+        },
+        {
+            subject: "Geografia",
+            question: "Qual é o ponto mais alto do relevo brasileiro?",
+            options: ["Pico da Bandeira", "Monte Roraima", "Pico da Neblina", "Pico das Agulhas Negras"],
+            correct: 2,
+            explanation: "O Pico da Neblina, no Amazonas, é o ponto culminante do Brasil."
+        }
+    ];
+
+    let score = 0;
+
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+
+        quizData.forEach((item, index) => {
+            // Cria o cartão da pergunta
+            const card = document.createElement('div');
+            card.className = 'question-card';
+
+            // Tag da Matéria
+            const tag = document.createElement('span');
+            tag.className = 'subject-tag';
+            tag.innerText = item.subject;
+            card.appendChild(tag);
+
+            // Texto da Pergunta
+            const qText = document.createElement('div');
+            qText.className = 'question-text';
+            qText.innerText = `${index + 1}. ${item.question}`;
+            card.appendChild(qText);
+
+            // Container das Opções
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+
+            item.options.forEach((opt, optIndex) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(btn, index, optIndex, item.correct, item.explanation);
+                optionsDiv.appendChild(btn);
+            });
+
+            card.appendChild(optionsDiv);
+
+            // Explicação (inicialmente oculta)
+            const explanationDiv = document.createElement('div');
+            explanationDiv.className = 'explanation';
+            explanationDiv.id = `explanation-${index}`;
+            card.appendChild(explanationDiv);
+
+            container.appendChild(card);
+        });
+    }
+
+    function checkAnswer(btnElement, questionIndex, selectedOption, correctOption, explanationText) {
+        const card = btnElement.parentElement.parentElement;
+        const buttons = card.querySelectorAll('.option-btn');
+        const explanationDiv = document.getElementById(`explanation-${questionIndex}`);
+
+        // Desabilita todos os botões dessa questão para não clicar de novo
+        buttons.forEach(button => button.disabled = true);
+
+        // Verifica se acertou
+        if (selectedOption === correctOption) {
+            btnElement.classList.add('correct');
+            score++;
+            document.getElementById('score').innerText = score;
+            explanationDiv.innerHTML = `<strong>Correto!</strong> <br> ${explanationText}`;
+        } else {
+            btnElement.classList.add('wrong');
+            // Marca a correta para o usuário saber qual era
+            buttons[correctOption].classList.add('correct');
+            explanationDiv.innerHTML = `<strong>Incorreto.</strong> A resposta certa era: <em>${buttons[correctOption].innerText}</em>.<br><br>${explanationText}`;
+        }
+
+        // Mostra a explicação
+        explanationDiv.style.display = 'block';
+    }
+
+    // Inicia o quiz ao carregar a página
+    window.onload = renderQuiz;
+
+</script>
+
+</body>
+</html>
